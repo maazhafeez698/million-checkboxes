@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+  <head>
+    <title>OMCB Socket Test</title>
+  </head>
+  <body>
+    <button id="toggle">Toggle #100</button>
+
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+
+    <script>
+      const socket = io("http://localhost:3000");
+
+      socket.on("connect", () => {
+        console.log("Connected:", socket.id);
+      });
+
+      socket.on("checkbox:updated", (event) => {
+        console.log("Checkbox updated:", event);
+      });
+
+      document.querySelector("#toggle").addEventListener("click", () => {
+        socket.emit("checkbox:toggle", 100, (response) => {
+          console.log("Toggle response:", response);
+        });
+      });
+    </script>
+  </body>
+</html>

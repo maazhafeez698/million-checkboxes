@@ -1,7 +1,6 @@
 import { Router } from "express";
 
 import {
-  getState,
   getStats,
   getSingleCheckbox,
   toggleCheckbox,
@@ -9,7 +8,6 @@ import {
 
 const router = Router();
 
-router.get("/state", getState);
 router.get("/stats", getStats);
 router.get("/:index", getSingleCheckbox);
 router.post("/:index/toggle", toggleCheckbox);

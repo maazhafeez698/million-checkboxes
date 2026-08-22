@@ -1,19 +1,4 @@
-import {
-  getCheckboxState,
-  toggle,
-  getOverview,
-  getInitialState,
-} from "./checkbox.service.js";
-
-export const getState = async (req, res, next) => {
-  try {
-    const state = await getInitialState();
-
-    res.json(state);
-  } catch (error) {
-    next(error);
-  }
-};
+import { getCheckboxState, toggle, getOverview } from "./checkbox.service.js";
 
 export const getStats = async (req, res, next) => {
   try {
