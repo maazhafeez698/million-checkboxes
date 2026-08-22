@@ -1,11 +1,7 @@
-function errorMiddleware(error, req, res, next) {
+export const errorMiddleware = (error, req, res, next) => {
   console.error(error);
 
-  if (res.headersSent) {
-    return next(error);
-  }
-
-  return res.status(500).json({ error: 'Internal server error' });
-}
-
-module.exports = errorMiddleware;
+  res.status(500).json({
+    error: "Internal server error",
+  });
+};

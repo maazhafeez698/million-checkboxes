@@ -1,10 +1,17 @@
-const express = require('express');
-const controller = require('./checkbox.controller');
+import { Router } from "express";
 
-const router = express.Router();
+import {
+  getState,
+  getStats,
+  getSingleCheckbox,
+  toggleCheckbox,
+} from "./checkbox.controller.js";
 
-router.post('/', controller.createCheckbox);
-router.get('/:id', controller.getCheckbox);
-router.patch('/:id', controller.updateCheckbox);
+const router = Router();
 
-module.exports = router;
+router.get("/state", getState);
+router.get("/stats", getStats);
+router.get("/:index", getSingleCheckbox);
+router.post("/:index/toggle", toggleCheckbox);
+
+export default router;

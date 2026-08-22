@@ -1,26 +1,33 @@
-const crypto = require('node:crypto');
-const repository = require('./checkbox.repository');
+import { env } from "../../config/env.js";
+import {
+  getCheckbox,
+  toggleCheckbox,
+  getCheckedCount,
+  getState,
+} from "./checkbox.repository.js";
 
-async function getCheckbox(id) {
-  return repository.findById(id);
-}
+export const getCheckboxState = async (index) => {
+  return getCheckbox(index);
+};
 
-async function createCheckbox(checked = false) {
-  return repository.save({
-    id: crypto.randomUUID(),
-    checked: Boolean(checked),
-    createdAt: new Date().toISOString()
-  });
-}
+export const toggle = async (index) => {
+  return toggleCheckbox(index);
+};
 
-async function setCheckboxState(id, checked) {
-  const checkbox = await repository.findById(id);
+export const getOverview = async () => {
+  const checked = await getCheckedCount();
 
-  if (!checkbox) {
-    return null;
-  }
+  return {
+    checked,
+    unchecked: env.checkboxCount - checked,
+  };
+};
 
-  return repository.save({ ...checkbox, checked: Boolean(checked) });
-}
+export const getInitialState = async () => {
+  const checked = await getCheckedCount();
 
-module.exports = { getCheckbox, createCheckbox, setCheckboxState };
+  return {
+    checked,
+    unchecked: env.checkboxCount - checked,
+  };
+};

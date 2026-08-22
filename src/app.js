@@ -1,4 +1,6 @@
 import express from "express";
+import checkboxRoutes from "./modules/checkbox/checkbox.routes.js";
+import { errorMiddleware } from "./middleware/error.middleware.js";
 
 const app = express();
 
@@ -10,5 +12,9 @@ app.get("/health", (req, res) => {
     service: "omcb",
   });
 });
+
+app.use("/api/checkboxes", checkboxRoutes);
+
+app.use(errorMiddleware);
 
 export default app;

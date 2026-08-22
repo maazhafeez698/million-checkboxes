@@ -1,25 +1,46 @@
-const { redisClient } = require('../../infrastructure/redis/redis.client');
+import redis from "../../infrastructure/redis/redis.client.js";
+import { env } from "../../config/env.js";
 
-const checkboxKey = (id) => `checkbox:${id}`;
-const inMemoryCheckboxes = new Map();
+const CHECKBOX_KEY = "omcb:checkboxes";
 
-async function findById(id) {
-  if (redisClient.isReady) {
-    const value = await redisClient.get(checkboxKey(id));
-    return value ? JSON.parse(value) : null;
+const toggleScript = `
+  local current = redis.call("GETBIT", KEYS[1], ARGV[1])
+  local next = 1 - current
+
+  redis.call("SETBIT", KEYS[1], ARGV[1], next)
+
+  return next
+`;
+
+const validateIndex = (index) => {
+  if (!Number.isInteger(index) || index < 0 || index >= env.checkboxCount) {
+    throw new Error("Invalid checkbox index");
   }
+};
 
-  return inMemoryCheckboxes.get(id) || null;
-}
+export const getCheckbox = async (index) => {
+  validateIndex(index);
 
-async function save(checkbox) {
-  if (redisClient.isReady) {
-    await redisClient.set(checkboxKey(checkbox.id), JSON.stringify(checkbox));
-  } else {
-    inMemoryCheckboxes.set(checkbox.id, checkbox);
-  }
+  return redis.getBit(CHECKBOX_KEY, index);
+};
 
-  return checkbox;
-}
+export const toggleCheckbox = async (index) => {
+  validateIndex(index);
 
-module.exports = { findById, save };
+  const result = await redis.eval(toggleScript, {
+    keys: [CHECKBOX_KEY],
+    arguments: [String(index)],
+  });
+
+  return Boolean(result);
+};
+
+export const getCheckedCount = async () => {
+  return redis.bitCount(CHECKBOX_KEY);
+};
+
+export const getState = async () => {
+  const state = await redis.get(CHECKBOX_KEY);
+
+  return state ?? "";
+};

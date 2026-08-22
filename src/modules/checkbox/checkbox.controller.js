@@ -1,28 +1,56 @@
-const service = require('./checkbox.service');
+import {
+  getCheckboxState,
+  toggle,
+  getOverview,
+  getInitialState,
+} from "./checkbox.service.js";
 
-async function getCheckbox(req, res) {
-  const checkbox = await service.getCheckbox(req.params.id);
+export const getState = async (req, res, next) => {
+  try {
+    const state = await getInitialState();
 
-  if (!checkbox) {
-    return res.status(404).json({ error: 'Checkbox not found' });
+    res.json(state);
+  } catch (error) {
+    next(error);
   }
+};
 
-  return res.json(checkbox);
-}
+export const getStats = async (req, res, next) => {
+  try {
+    const stats = await getOverview();
 
-async function createCheckbox(req, res) {
-  const checkbox = await service.createCheckbox(req.body?.checked);
-  return res.status(201).json(checkbox);
-}
-
-async function updateCheckbox(req, res) {
-  const checkbox = await service.setCheckboxState(req.params.id, req.body?.checked);
-
-  if (!checkbox) {
-    return res.status(404).json({ error: 'Checkbox not found' });
+    res.json(stats);
+  } catch (error) {
+    next(error);
   }
+};
 
-  return res.json(checkbox);
-}
+export const getSingleCheckbox = async (req, res, next) => {
+  try {
+    const index = Number(req.params.index);
 
-module.exports = { getCheckbox, createCheckbox, updateCheckbox };
+    const checked = await getCheckboxState(index);
+
+    res.json({
+      index,
+      checked,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const toggleCheckbox = async (req, res, next) => {
+  try {
+    const index = Number(req.params.index);
+
+    const checked = await toggle(index);
+
+    res.json({
+      index,
+      checked,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
