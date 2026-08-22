@@ -1,4 +1,10 @@
-import { getCheckboxState, toggle, getOverview } from "./checkbox.service.js";
+import {
+  getCheckboxState,
+  toggle,
+  getOverview,
+  getChunk,
+  getCheckedIndexes
+} from "./checkbox.service.js";
 
 export const getStats = async (req, res, next) => {
   try {
@@ -34,6 +40,36 @@ export const toggleCheckbox = async (req, res, next) => {
     res.json({
       index,
       checked,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getCheckboxChunk = async (req, res, next) => {
+  try {
+    const chunkIndex = Number(req.params.chunkIndex);
+
+    if (!Number.isInteger(chunkIndex) || chunkIndex < 0) {
+      return res.status(400).json({
+        message: "Invalid chunk index",
+      });
+    }
+
+    const chunk = await getChunk(chunkIndex);
+
+    res.json(chunk);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getCheckedIndexesController = async (req, res, next) => {
+  try {
+    const indexes = await getCheckedIndexes();
+
+    res.json({
+      indexes,
     });
   } catch (error) {
     next(error);

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>OMCB — One Million Checkboxes</title>
+
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+
+  <body>
+    <main class="app">
+      <header class="header">
+        <div>
+          <span class="eyebrow">REAL-TIME EXPERIMENT</span>
+          <h1>One Million Checkboxes</h1>
+        </div>
+
+        <div id="connection-status" class="status">Connecting...</div>
+      </header>
+
+      <section class="stats">
+        <div class="stat">
+          <span>Checked</span>
+          <strong id="checked-count">0</strong>
+        </div>
+
+        <div class="stat">
+          <span>Unchecked</span>
+          <strong id="unchecked-count">1,000,000</strong>
+        </div>
+
+        <div class="stat">
+          <span>Your changes</span>
+          <strong id="user-changes">0</strong>
+        </div>
+      </section>
+
+      <section class="grid-wrapper">
+        <div id="checkbox-grid"></div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="module" src="/js/app.js"></script>
+  </body>
+</html>

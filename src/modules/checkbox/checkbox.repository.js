@@ -44,3 +44,15 @@ export const getState = async () => {
 
   return state ?? "";
 };
+
+export const getCheckboxChunk = async (start, size) => {
+  const values = [];
+
+  for (let index = start; index < start + size; index++) {
+    const checked = await getCheckbox(index);
+
+    values.push(checked);
+  }
+
+  return values;
+};
