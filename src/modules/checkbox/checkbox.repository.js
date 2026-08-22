@@ -14,7 +14,10 @@ const toggleScript = `
 
 const validateIndex = (index) => {
   if (!Number.isInteger(index) || index < 0 || index >= env.checkboxCount) {
-    throw new Error("Invalid checkbox index");
+    const error = new Error("Invalid checkbox index");
+    error.statusCode = 400;
+
+    throw error;
   }
 };
 

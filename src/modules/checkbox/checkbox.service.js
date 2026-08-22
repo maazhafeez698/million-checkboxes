@@ -44,7 +44,10 @@ export const getChunk = async (chunkIndex) => {
   const start = chunkIndex * env.checkboxChunkSize;
 
   if (start >= env.checkboxCount) {
-    throw new Error("Invalid chunk");
+    const error = new Error("Invalid chunk index");
+    error.statusCode = 400;
+
+    throw error;
   }
 
   const remaining = env.checkboxCount - start;
@@ -59,18 +62,4 @@ export const getChunk = async (chunkIndex) => {
     size,
     values,
   };
-};
-
-export const getCheckedIndexes = async () => {
-  const indexes = [];
-
-  for (let index = 0; index < env.checkboxCount; index++) {
-    const checked = await getCheckbox(index);
-
-    if (checked) {
-      indexes.push(index);
-    }
-  }
-
-  return indexes;
 };

@@ -12,33 +12,56 @@
   <body>
     <main class="app">
       <header class="header">
-        <div>
-          <span class="eyebrow">REAL-TIME EXPERIMENT</span>
-          <h1>One Million Checkboxes</h1>
+        <div class="brand">
+          <div class="eyebrow">
+            <span class="brand-mark">OMCB</span>
+            <span>SHARED DIGITAL CANVAS</span>
+          </div>
+
+          <h1>One Million<br />Checkboxes</h1>
+
+          <p class="subtitle">Paint a pixel. Everyone sees it.</p>
         </div>
 
-        <div id="connection-status" class="status">Connecting...</div>
+        <div id="connection-status" class="status">
+          <span class="status-dot"></span>
+          <span class="status-text">Connecting...</span>
+        </div>
       </header>
 
       <section class="stats">
-        <div class="stat">
-          <span>Checked</span>
+        <div class="stat stat-primary">
+          <span class="stat-label">Checked</span>
           <strong id="checked-count">0</strong>
+          <small>global</small>
         </div>
 
         <div class="stat">
-          <span>Unchecked</span>
+          <span class="stat-label">Unchecked</span>
           <strong id="unchecked-count">1,000,000</strong>
+          <small>remaining</small>
         </div>
 
         <div class="stat">
-          <span>Your changes</span>
+          <span class="stat-label">Your Activity</span>
           <strong id="user-changes">0</strong>
+          <small>this session</small>
         </div>
       </section>
 
-      <section class="grid-wrapper">
-        <div id="checkbox-grid"></div>
+      <section class="canvas-section">
+        <div class="canvas-header">
+          <div>
+            <span class="canvas-label">LIVE CANVAS</span>
+            <span class="canvas-hint">Click a box to paint it</span>
+          </div>
+
+          <span class="canvas-size">1,000,000 pixels</span>
+        </div>
+
+        <div class="grid-wrapper">
+          <div id="checkbox-grid"></div>
+        </div>
       </section>
     </main>
 

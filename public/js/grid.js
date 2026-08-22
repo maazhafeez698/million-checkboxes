@@ -8,9 +8,16 @@ const container = grid.parentElement;
 const COLUMNS = 20;
 const CELL_SIZE = 32;
 const BUFFER_ROWS = 4;
-const CHUNK_SIZE = 400;
 
 let visibleRows = 0;
+let initialized = false;
+let bottomShown = false;
+
+/*
+|--------------------------------------------------------------------------
+| Grid calculations
+|--------------------------------------------------------------------------
+*/
 
 const getTotalRows = () => {
   return Math.ceil(state.total / COLUMNS);
@@ -20,11 +27,69 @@ const calculateVisibleRows = () => {
   visibleRows = Math.ceil(container.clientHeight / CELL_SIZE);
 };
 
+/*
+|--------------------------------------------------------------------------
+| Chunk handling
+|--------------------------------------------------------------------------
+*/
+
 const getChunkIndex = (index) => {
-  return Math.floor(index / CHUNK_SIZE);
+  return Math.floor(index / state.chunkSize);
 };
 
-const getVisibleRange = () => {
+const loadChunk = async (chunkIndex) => {
+  if (state.loadedChunks.has(chunkIndex)) {
+    return;
+  }
+
+  state.loadedChunks.add(chunkIndex);
+
+  try {
+    const response = await fetch(`/api/checkboxes/chunk/${chunkIndex}`);
+
+    if (!response.ok) {
+      throw new Error(`Failed to load chunk ${chunkIndex}`);
+    }
+
+    const chunk = await response.json();
+
+    chunk.values.forEach((checked, offset) => {
+      state.checkboxes.set(chunk.start + offset, checked === 1);
+    });
+
+    renderVisibleRows();
+  } catch (error) {
+    state.loadedChunks.delete(chunkIndex);
+
+    console.error(error);
+  }
+};
+
+const loadVisibleChunks = (firstRow, lastRow) => {
+  const firstIndex = firstRow * COLUMNS;
+
+  const lastIndex = Math.min(state.total - 1, lastRow * COLUMNS - 1);
+
+  const firstChunk = getChunkIndex(firstIndex);
+
+  const lastChunk = getChunkIndex(lastIndex);
+
+  for (let chunk = firstChunk; chunk <= lastChunk; chunk++) {
+    loadChunk(chunk);
+  }
+};
+
+/*
+|--------------------------------------------------------------------------
+| Render
+|--------------------------------------------------------------------------
+*/
+
+const renderVisibleRows = () => {
+  if (!initialized) {
+    return;
+  }
+
   const scrollTop = container.scrollTop;
 
   const firstRow = Math.max(0, Math.floor(scrollTop / CELL_SIZE) - BUFFER_ROWS);
@@ -34,70 +99,24 @@ const getVisibleRange = () => {
     firstRow + visibleRows + BUFFER_ROWS * 2,
   );
 
-  return {
-    firstRow,
-    lastRow,
-  };
-};
+  /*
+   * This is the important part.
+   *
+   * The grid represents the COMPLETE
+   * 1,000,000-checkbox space.
+   */
+  grid.style.height = `${getTotalRows() * CELL_SIZE}px`;
 
-const loadChunk = async (chunkIndex) => {
-  if (state.loadedChunks.has(chunkIndex)) {
-    return;
-  }
+  /*
+   * Load only the chunks needed around
+   * the current viewport.
+   */
+  loadVisibleChunks(firstRow, lastRow);
 
-  const url = `/api/checkboxes/chunk/${chunkIndex}`;
-
-  console.log("LOADING CHUNK:", chunkIndex);
-  console.log("FETCH URL:", url);
-
-  try {
-    const response = await fetch(url);
-
-    console.log("CHUNK RESPONSE:", chunkIndex, response.status);
-
-    if (!response.ok) {
-      throw new Error(`Failed to load chunk ${chunkIndex}`);
-    }
-
-    const chunk = await response.json();
-
-    console.log("CHUNK DATA:", chunkIndex, chunk);
-
-    chunk.values.forEach((checked, offset) => {
-      state.checkboxes.set(chunk.start + offset, Boolean(checked));
-    });
-    state.loadedChunks.add(chunkIndex);
-
-    console.log("CHUNK LOADED:", chunkIndex);
-  } catch (error) {
-    console.error(`Chunk ${chunkIndex} failed:`, error);
-  }
-};
-
-const loadVisibleChunks = async () => {
-  console.log("LOADING VISIBLE CHUNKS");
-  const { firstRow, lastRow } = getVisibleRange();
-
-  const firstIndex = firstRow * COLUMNS;
-
-  const lastIndex = Math.min(state.total, lastRow * COLUMNS);
-
-  const firstChunk = getChunkIndex(firstIndex);
-
-  const lastChunk = getChunkIndex(Math.max(0, lastIndex - 1));
-
-  const requests = [];
-
-  for (let chunk = firstChunk; chunk <= lastChunk; chunk++) {
-    requests.push(loadChunk(chunk));
-  }
-
-  await Promise.all(requests);
-};
-
-const renderVisibleRows = () => {
-  const { firstRow, lastRow } = getVisibleRange();
-
+  /*
+   * Remove only the currently rendered
+   * virtual elements.
+   */
   grid.innerHTML = "";
 
   const fragment = document.createDocumentFragment();
@@ -112,9 +131,19 @@ const renderVisibleRows = () => {
 
       const checkbox = document.createElement("button");
 
+      checkbox.type = "button";
+
       checkbox.className = "checkbox";
 
       checkbox.dataset.index = index;
+
+      checkbox.style.position = "absolute";
+
+      checkbox.style.top = `${row * CELL_SIZE}px`;
+
+      checkbox.style.left = `${((column + 0.5) / COLUMNS) * 100}%`;
+
+      checkbox.style.transform = "translateX(-50%)";
 
       checkbox.classList.toggle(
         "checked",
@@ -131,14 +160,52 @@ const renderVisibleRows = () => {
 
   grid.appendChild(fragment);
 
-  grid.style.transform = `translateY(${firstRow * CELL_SIZE}px)`;
+  /*
+   * Bottom detection.
+   */
+  const atBottom =
+    container.scrollTop + container.clientHeight >= container.scrollHeight - 2;
+
+  if (atBottom) {
+    showBottomToast();
+  } else {
+    bottomShown = false;
+  }
 };
 
-const refreshVisibleArea = async () => {
-  await loadVisibleChunks();
+/*
+|--------------------------------------------------------------------------
+| Bottom message
+|--------------------------------------------------------------------------
+*/
 
-  renderVisibleRows();
+const showBottomToast = () => {
+  if (bottomShown) {
+    return;
+  }
+
+  bottomShown = true;
+
+  const toast = document.querySelector("#toast");
+
+  if (!toast) {
+    return;
+  }
+
+  toast.textContent = "You have reached the bottom";
+
+  toast.classList.add("show");
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+  }, 1400);
 };
+
+/*
+|--------------------------------------------------------------------------
+| Socket update
+|--------------------------------------------------------------------------
+*/
 
 const updateVisibleCheckbox = (index, checked) => {
   const checkbox = grid.querySelector(`[data-index="${index}"]`);
@@ -150,27 +217,58 @@ const updateVisibleCheckbox = (index, checked) => {
   checkbox.classList.toggle("checked", checked);
 };
 
-export const initializeGrid = async () => {
-  console.log("GRID INITIALIZED");
+/*
+|--------------------------------------------------------------------------
+| Scroll
+|--------------------------------------------------------------------------
+*/
+
+const handleScroll = () => {
+  renderVisibleRows();
+};
+
+/*
+|--------------------------------------------------------------------------
+| Resize
+|--------------------------------------------------------------------------
+*/
+
+const handleResize = () => {
   calculateVisibleRows();
 
-  grid.style.height = `${getTotalRows() * CELL_SIZE}px`;
+  renderVisibleRows();
+};
+
+/*
+|--------------------------------------------------------------------------
+| Initialize
+|--------------------------------------------------------------------------
+*/
+
+export const initializeGrid = () => {
+  if (initialized) {
+    return;
+  }
+
+  initialized = true;
+
+  calculateVisibleRows();
 
   /*
-   * Load the initial visible chunks
-   * before rendering the grid.
+   * Full million-checkbox virtual height.
+   *
+   * 1,000,000 / 20 = 50,000 rows
+   * 50,000 × 32px = 1,600,000px
    */
-  await refreshVisibleArea();
+  grid.style.height = `${getTotalRows() * CELL_SIZE}px`;
 
-  container.addEventListener("scroll", () => {
-    refreshVisibleArea();
+  renderVisibleRows();
+
+  container.addEventListener("scroll", handleScroll, {
+    passive: true,
   });
 
-  window.addEventListener("resize", async () => {
-    calculateVisibleRows();
-
-    await refreshVisibleArea();
-  });
+  window.addEventListener("resize", handleResize);
 
   setCheckboxUpdateHandler((index, checked) => {
     state.checkboxes.set(index, checked);

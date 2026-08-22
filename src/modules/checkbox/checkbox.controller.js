@@ -3,7 +3,6 @@ import {
   toggle,
   getOverview,
   getChunk,
-  getCheckedIndexes
 } from "./checkbox.service.js";
 
 export const getStats = async (req, res, next) => {
@@ -59,18 +58,6 @@ export const getCheckboxChunk = async (req, res, next) => {
     const chunk = await getChunk(chunkIndex);
 
     res.json(chunk);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const getCheckedIndexesController = async (req, res, next) => {
-  try {
-    const indexes = await getCheckedIndexes();
-
-    res.json({
-      indexes,
-    });
   } catch (error) {
     next(error);
   }
