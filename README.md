@@ -10,7 +10,7 @@ The application models a large logical canvas without creating one million DOM n
 
 The application presents a shared, virtualized checkbox canvas with live global statistics and real-time connection status.
 
-![One Million Checkboxes demo](demo.png)
+![One Million Checkboxes demo](/public/demo.png)
 
 ## Purpose
 
