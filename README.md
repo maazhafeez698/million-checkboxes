@@ -12,7 +12,8 @@ The application presents a shared, virtualized checkbox canvas with live global 
 
 ![One Million Checkboxes demo](/public/demo.png)
 
-## Video Link https://eieio.games/blog/the-secret-inside-one-million-checkboxes/
+## Video Link
+https://www.linkedin.com/feed/update/urn:li:ugcPost:7500184356175589377/
 
 ## Purpose
 
