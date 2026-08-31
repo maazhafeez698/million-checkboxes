@@ -12,6 +12,8 @@ The application presents a shared, virtualized checkbox canvas with live global 
 
 ![One Million Checkboxes demo](/public/demo.png)
 
+## Video Link https://eieio.games/blog/the-secret-inside-one-million-checkboxes/
+
 ## Purpose
 
 One Million Checkboxes was built as an engineering practice project to explore real-time and scalable web application concepts in a simple, measurable system.
@@ -202,31 +204,34 @@ The browser also observes Socket.IO `connect` and `disconnect` events to show li
 ```text
 .
 ├── public/
-│   ├── index.html             Static application shell
-│   ├── css/styles.css         UI styles
+│   ├── index.html                              Static application shell
+│   ├── css/styles.css                          UI styles
 │   └── js/
-│       ├── app.js             Stats loading and application startup
-│       ├── grid.js            Chunk loading and virtualized rendering
-│       ├── socket.js          Socket.IO client events
-│       └── state.js            Client-side session state
+│       ├── app.js                              Stats loading and application startup
+│       ├── grid.js                             Chunk loading and virtualized rendering
+│       ├── socket.js                           Socket.IO client events
+│       └── state.js                            Client-side session state
 ├── src/
-│   ├── app.js                 Express app and static file hosting
-│   ├── server.js              HTTP, Redis, Socket.IO startup
-│   ├── config/env.js          Runtime configuration defaults
+│   ├── app.js                                  Express app and static file hosting
+│   ├── server.js                               HTTP, Redis, Socket.IO startup
+│   ├── config/env.js                           Runtime configuration defaults
 │   ├── infrastructure/
-│   │   ├── redis/              Redis client connections
-│   │   └── socket/              Socket.IO and Pub/Sub wiring
-│   ├── middleware/             Error handling middleware
+│   │   ├── redis/                              Redis client connections
+│   │   └── socket/                             Socket.IO and Pub/Sub wiring
+│   ├── middleware/                             Error handling middleware
 │   └── modules/checkbox/
-│       ├── checkbox.routes.js  REST route definitions
+│       ├── checkbox.routes.js                  REST route definitions
 │       ├── checkbox.controller.js
-│       ├── checkbox.service.js Business flow and events
-│       ├── checkbox.repository.js Redis bitmap operations
-│       └── checkbox.socket.js  Socket event handlers and throttling
-├── docker-compose.yml          Local Redis service
-├── test-socket.html            Manual Socket.IO smoke-test page
-├── .env.example                Environment variable template
-└── package.json
+│       ├── checkbox.service.js                 Business flow and events
+│       ├── checkbox.repository.js              Redis bitmap operations
+│       └── checkbox.socket.js                  Socket event handlers and throttling
+├── docker-compose.yml                          Local Redis service
+├── .env.example                                Environment variable template
+├── .gitignore 
+├── README.md
+├── package-lock.json                   
+└── package.json               
+
 ```
 
 ## Installation & Setup
@@ -312,4 +317,3 @@ curl http://localhost:3000/health
 - **Chunking:** trade a small number of predictable requests for lower initial payload and memory use.
 - **Rate limiting:** throttle rapid socket actions at the connection boundary.
 - **Real-time synchronization:** broadcast state changes so connected clients converge on the same checkbox state.
-- **Separation of concerns:** static UI, transport, business logic, infrastructure, and storage have distinct modules.
